@@ -5,7 +5,9 @@ using namespace std;
 
 class bigint 
 {
-public: 
+public:  
+    vector<uint8_t> digits;
+    bool is_negative; 
     //Constructors 
     bigint();
     bigint(int64_t);            // constructor for processing int64_t
@@ -28,37 +30,39 @@ public:
     bigint operator-();  
 
     //comparison
-    bigint operator==(const bigint &);
-    bigint operator!=(const bigint &); 
-    bigint operator<(const bigint &); 
-    bigint operator<=(const bigint &);
-    bigint operator>(const bigint &); 
-    bigint operator>=(const bigint &); 
+    bool operator==(const bigint &);
+    bool operator!=(const bigint &); 
+    bool operator<(const bigint &); 
+    bool operator<=(const bigint &);
+    bool operator>(const bigint &); 
+    bool operator>=(const bigint &); 
 
     //insertion
     friend ostream &operator<<(ostream &, const bigint &);
 
     //increment and decrement
-    bigint operator++();               
-    bigint operator--(); 
+    //pre
+    bigint& operator++();               
+    bigint& operator--(); 
+    //post
+    bigint operator++(int);
+    bigint operator--(int);
 
          
 private: 
-    vector<uint8_t> digits;
-    bool is_negative;
-
-
     //helper functions
     bigint negate(const bigint &);  
     bigint add(const bigint&, const bigint&);  
     bigint subtract(const bigint&, const bigint&);
+    void remove_leading_zeros();
+
 };
 
 
 //constructor
 bigint::bigint()
 {
-    digits = {};
+    digits = {0};
     is_negative = false;
 }
 
@@ -99,6 +103,7 @@ bigint::bigint(const string& str)
         digits.push_back(ch - '0'); 
     }
 
+    remove_leading_zeros();
 }
 
 
@@ -179,6 +184,7 @@ bigint bigint::operator+(const bigint& other)
         result = add(*this, other);
 
         result.is_negative = is_negative;
+        result.remove_leading_zeros();
         return result;
     } else {
         // if signs are different, perform subtraction
@@ -198,6 +204,7 @@ bigint bigint::operator+(const bigint& other)
 bigint bigint::operator+=(const bigint& other)
 {
     *this = *this + other;
+    remove_leading_zeros();
     return *this;
 }
 
@@ -224,6 +231,8 @@ bigint bigint::operator-(const bigint& other)
         result.is_negative = is_negative;
     
     }
+
+    result.remove_leading_zeros();
     return result;
     
 }
@@ -231,6 +240,7 @@ bigint bigint::operator-(const bigint& other)
 bigint bigint::operator-=(const bigint& other)
 {
     *this = *this - other;
+    remove_leading_zeros();
     return *this;
 }
 
@@ -248,15 +258,16 @@ bigint bigint::operator*(const bigint& other)
 
     for (size_t i = 0; i < digits.size(); i++) 
     {
-        bigint temp; // Temporary bigint to store intermediate results
+        bigint temp;
         uint8_t carry = 0;
 
-        // Shift the digits in temp based on the current position in the first number
+        // shift temp to the left
         for (size_t j = 0; j < i; j++) 
         {
             temp.digits.push_back(0); 
         }
-        
+
+            
         for (size_t j = 0; j < other.digits.size(); j++) 
         {
             uint16_t product = digits[i] * other.digits[j] + carry; 
@@ -264,7 +275,7 @@ bigint bigint::operator*(const bigint& other)
             carry = product / 10; 
         }
 
-        // for any carry left, add it to temp
+        // for any leftover carry, add it to temp
         if (carry > 0) 
         {
             temp.digits.push_back(carry);
@@ -275,13 +286,14 @@ bigint bigint::operator*(const bigint& other)
 
     
     result.is_negative = is_negative ^ other.is_negative;
-
+    result.remove_leading_zeros();
     return result;
 }
 
 bigint bigint::operator*=(const bigint& other)
 {
     *this = *this * other;
+    remove_leading_zeros();
     return *this;
 }
 
@@ -293,13 +305,121 @@ bigint bigint::operator-()
     return result;
 }
 
+bool bigint::operator==(const bigint& other)
+{   
 
+    if (is_negative != other.is_negative || digits.size() != other.digits.size()){
+        return false;
+    }
+    for (size_t i = 0; i < digits.size(); i++){
+        uint8_t digit1 = digits[i];
+        uint8_t digit2 = other.digits[i];
+        if(digit1!=digit2){
+            return false;
+        }
+    }
+    return true;
+}
 
+bool bigint::operator!=(const bigint& other)
+{
+    return !(*this == other);
+}   
 
+bool bigint::operator<(const bigint& other)
+{
+    //compare sign 
+    if (is_negative && !other.is_negative) {
+        return true;
+    }
+    if (!is_negative && other.is_negative) {
+        return false;
+    }
 
+    //compare length
+    if (digits.size() < other.digits.size()) {
+        return !is_negative;
+    }
+    if (digits.size() > other.digits.size()) {
+        return is_negative;
+    }
 
+    //compare each digit 
+    for (size_t i = digits.size(); i > 0; i--) {
+        if (digits[i - 1] < other.digits[i - 1]) {
+            return !is_negative;
+    }
+        if (digits[i - 1] > other.digits[i - 1]) {
+            return is_negative;
+    }
+}
 
+    return false;
+}
+bool bigint::operator<=(const bigint& other)
+{
+    return *this < other || *this == other;
+}
+bool bigint::operator>(const bigint& other)
+{
+    return !(*this <= other);
+}
+bool bigint::operator>=(const bigint& other)
+{
+    return !(*this < other);
+}
 
+ostream& operator<<(ostream& os, const bigint& num)
+{
+    if(num.is_negative)
+    {
+        os << '-';
+    }
+    if (num.digits.size() == 1 && num.digits[0] == 0)
+    {
+        os << '0';
+        return os;
+    } else {
+        for (int64_t i = (int16_t)num.digits.size() - 1; i >= 0; i--)
+
+        {
+            os << to_string(num.digits[i]);
+        }
+    }
+    
+    
+}
+
+bigint& bigint::operator++()
+{
+    *this += bigint(1);
+    return *this;
+}
+bigint& bigint::operator--()
+{
+    *this -= bigint(1);
+    return *this;
+}
+
+bigint bigint::operator++(int) {
+    bigint temp = *this;  
+    ++(*this);            
+    return temp;          
+}
+
+bigint bigint::operator--(int) {
+    bigint temp = *this; 
+    --(*this);            
+    return temp;          
+}
+
+void bigint::remove_leading_zeros()
+{
+    while (digits.size() > 1 && digits.back() == 0)
+    {
+        digits.pop_back();
+    }
+}
 
 
 
