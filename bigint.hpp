@@ -1,8 +1,6 @@
 #include <vector>
 #include <iostream>
 
-using namespace std;
-
 class bigint 
 {
 public:  
@@ -10,7 +8,7 @@ public:
     //Constructors 
     bigint();
     bigint(int64_t);            // constructor for processing int64_t
-    bigint(const string &);     // constructor for processing string
+    bigint(const std::string &);     // constructor for processing string
 
     //Operators
     //subtraction
@@ -38,7 +36,7 @@ public:
     bool operator>=(const bigint&) const; 
 
     //insertion
-    friend ostream &operator<<(ostream &, const bigint &);
+    friend std::ostream &operator<<(std::ostream &, const bigint &);
 
     //increment and decrement
     //pre
@@ -49,14 +47,13 @@ public:
     bigint operator--(int);
          
 private: 
-    vector<uint8_t> digits;
+    std::vector<uint8_t> digits;
     bool is_negative; 
     
     //helper functions + variables
     bigint negate(const bigint &);  
     bigint add(const bigint&, const bigint&);  
     bigint subtract(const bigint&, const bigint&);
-    void remove_leading_zeros();
 };
 
 
@@ -70,7 +67,7 @@ bigint::bigint()
 bigint::bigint(int64_t val)
 {  
     is_negative = (val < 0);
-    val = abs(val);
+    val = std::abs(val);
 
     if (val == 0)
     {
@@ -78,17 +75,17 @@ bigint::bigint(int64_t val)
     } else {
         while (val > 0)
         {
-            digits.push_back(((uint8_t)val) % 10);
+            digits.push_back(val % 10);
             val /= 10;
         }
     } 
 }
 
-bigint::bigint(const string& str)
+bigint::bigint(const std::string& str)
 {
     if(str.empty())
     {
-        throw invalid_argument("Input String is Empty");
+        throw std::invalid_argument("Input String is Empty");
     }
 
     is_negative = (str[0] == '-');
@@ -99,12 +96,10 @@ bigint::bigint(const string& str)
         char ch = str[i - 1]; 
         if (ch < '0' || ch > '9') 
         {
-            throw invalid_argument("Invalid character in input string.");
+            throw std::invalid_argument("Invalid character in input string.");
         }
         digits.push_back((uint8_t)ch - '0'); 
     }
-
-    remove_leading_zeros();
 }
 
 
@@ -119,12 +114,14 @@ bigint bigint::negate(const bigint& num)
 bigint bigint::add(const bigint& num1, const bigint& num2)
 {
     bigint result;
+    result.digits.clear(); //remove leading zeros
     uint8_t carry = 0;
     constexpr int8_t base = 10;
+    
 
     size_t size1 = num1.digits.size();
     size_t size2 = num2.digits.size();
-    uint64_t max_size = max(size1, size2);  //take the larger size for for loop 
+    uint64_t max_size = std::max(size1, size2);  //take the larger size for for loop 
 
     for(uint64_t i = 0; i < max_size; i++) {
             //if i exceeds the size of digits, set it to 0
@@ -140,25 +137,26 @@ bigint bigint::add(const bigint& num1, const bigint& num2)
     if(carry > 0) {
         result.digits.push_back(carry);
     }
-
+    
     return result;
 }
 
 bigint bigint::subtract(const bigint& num1, const bigint& num2)
 {
     bigint result;
+    result.digits.clear(); //remove leading zeros
     uint8_t borrow = 0;
     constexpr int8_t base = 10;
 
     size_t size1 = num1.digits.size();
     size_t size2 = num2.digits.size();
-    uint64_t max_size = max(size1, size2); 
+    uint64_t max_size = std::max(size1, size2); 
 
     for (uint64_t i = 0; i < max_size; i++) {
         uint8_t digit1 = (i < size1) ? num1.digits[i] : 0;       
         uint8_t digit2 = (i < size2) ? num2.digits[i] : 0;
 
-        int8_t diff = (int8_t)(digit1 - digit2 - borrow);
+        int16_t diff = (digit1 - digit2 - borrow);
 
         if (diff < 0) {
             diff += base;
@@ -169,9 +167,9 @@ bigint bigint::subtract(const bigint& num1, const bigint& num2)
 
         result.digits.push_back((uint8_t)diff);
     }
-
-    // Remove leading zeros
-    while (result.digits.size() > 1 && result.digits.back() == 0) {
+    //remove leading zeros
+        while (result.digits.size() > 1 && result.digits.back() == 0)
+    {
         result.digits.pop_back();
     }
 
@@ -182,17 +180,17 @@ bigint bigint::subtract(const bigint& num1, const bigint& num2)
 bigint bigint::operator+(const bigint& other) 
 {   
     bigint result;
+    //if both + or -, add
     if(is_negative ==other.is_negative) 
     {
         result = add(*this, other);
-
         result.is_negative = is_negative;
-        result.remove_leading_zeros();
+        std::cout << "both sign same: " << result.is_negative << std::endl;
         return result;
     } else {
-        // if signs are different, perform subtraction
+        // if this is - 
         if (is_negative) 
-        {
+        {   
             bigint positive_this = negate(*this); 
             bigint bigintOther = other;
             return bigintOther - positive_this;
@@ -208,7 +206,7 @@ bigint bigint::operator+(const bigint& other)
 bigint bigint::operator+=(const bigint& other)
 {
     *this = *this + other;
-    remove_leading_zeros();
+
     return *this;
 }
 
@@ -216,27 +214,40 @@ bigint bigint::operator-(const bigint& other)
 {   
     bigint result;
     
-    // same sign, subtration 
-    if (is_negative == other.is_negative) 
+        // If signs are different, addition
+    if (is_negative != other.is_negative) 
     {
-        if(*this < other) 
+        result = add(*this, negate(other));
+        result.is_negative = is_negative;
+        return result;
+    } 
+    // If both are negative, subtract, determine sign based on which is larger
+    if (is_negative && other.is_negative) 
+    {
+        //
+        if (negate(*this) <= negate(other)) 
         {
-            //use other to subtract this, set is_negative to true
+            result = subtract(negate(other), negate(*this)); 
+            result.is_negative = false; 
+            
+        } else {
+            result = subtract(negate(*this), negate(other)); 
+            result.is_negative = true;
+        }
+    } else {     
+        // If both are positive, normal subtraction
+        if (*this < other) 
+        {
             result = subtract(other, *this); 
             result.is_negative = true;
-
-        } else {
-             //use this to subtract other, set is_negative to false
+        } 
+        else 
+        {
             result = subtract(*this, other); 
             result.is_negative = false;
         }
-    } else {     
-        result = add(*this, other);
-        result.is_negative = is_negative;
-    
     }
 
-    result.remove_leading_zeros();
     return result;
     
 }
@@ -244,7 +255,6 @@ bigint bigint::operator-(const bigint& other)
 bigint bigint::operator-=(const bigint& other)
 {
     *this = *this - other;
-    remove_leading_zeros();
     return *this;
 }
 
@@ -289,14 +299,12 @@ bigint bigint::operator*(const bigint& other)
 
     
     result.is_negative = is_negative ^ other.is_negative;
-    result.remove_leading_zeros();
     return result;
 }
 
 bigint bigint::operator*=(const bigint& other)
 {
     *this = *this * other;
-    remove_leading_zeros();
     return *this;
 }
 
@@ -338,6 +346,18 @@ bool bigint::operator<(const bigint& other) const
     if (!is_negative && other.is_negative) {
         return false;
     }
+    // Both negative, compare absolute values
+    if (is_negative && other.is_negative) {
+        if (digits.size() != other.digits.size()) {
+            return digits.size() > other.digits.size();
+        }
+        for (size_t i = digits.size(); i > 0; i--) {
+            if (digits[i - 1] != other.digits[i - 1]) {
+                return digits[i - 1] > other.digits[i - 1];
+            }
+        }
+        return false;
+    }
 
     //compare length
     if (digits.size() < other.digits.size()) {
@@ -372,7 +392,7 @@ bool bigint::operator>=(const bigint& other) const
     return !(*this < other);
 }
 
-ostream& operator<<(ostream& os, const bigint& num)
+std::ostream& operator<<(std::ostream& os, const bigint& num)
 {
     if(num.is_negative)
     {
@@ -383,10 +403,10 @@ ostream& operator<<(ostream& os, const bigint& num)
         os << '0';
         return os;
     } else {
-        for (int64_t i = (int64_t)num.digits.size() - 1; i >= 0; i--)
+        for (size_t i = num.digits.size(); i > 0; i--)
 
         {
-            os << to_string(num.digits[i]);
+            os << std::to_string(num.digits[i-1]);
         }
     }
 
@@ -416,14 +436,6 @@ bigint bigint::operator--(int) {
     bigint temp = *this; 
     --(*this);            
     return temp;          
-}
-
-void bigint::remove_leading_zeros()
-{
-    while (digits.size() > 1 && digits.back() == 0)
-    {
-        digits.pop_back();
-    }
 }
 
 
