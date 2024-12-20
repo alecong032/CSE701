@@ -6,21 +6,21 @@ using namespace std;
 class bigint 
 {
 public:  
-    vector<uint8_t> digits;
-    bool is_negative; 
+    
     //Constructors 
     bigint();
     bigint(int64_t);            // constructor for processing int64_t
     bigint(const string &);     // constructor for processing string
 
     //Operators
+    //subtraction
+    bigint operator-(const bigint &); 
+    bigint operator-=(const bigint &); 
     //addition 
     bigint operator+(const bigint &); 
     bigint operator+=(const bigint &); 
     
-    //subtraction
-    bigint operator-(const bigint &); 
-    bigint operator-=(const bigint &); 
+    
    
     //multiplication
     bigint operator*(const bigint &); 
@@ -30,12 +30,12 @@ public:
     bigint operator-();  
 
     //comparison
-    bool operator==(const bigint &);
-    bool operator!=(const bigint &); 
-    bool operator<(const bigint &); 
-    bool operator<=(const bigint &);
-    bool operator>(const bigint &); 
-    bool operator>=(const bigint &); 
+    bool operator==(const bigint&) const; 
+    bool operator!=(const bigint&) const; 
+    bool operator<(const bigint&) const; 
+    bool operator<=(const bigint&) const; 
+    bool operator>(const bigint&) const; 
+    bool operator>=(const bigint&) const; 
 
     //insertion
     friend ostream &operator<<(ostream &, const bigint &);
@@ -47,15 +47,16 @@ public:
     //post
     bigint operator++(int);
     bigint operator--(int);
-
          
 private: 
-    //helper functions
+    vector<uint8_t> digits;
+    bool is_negative; 
+    
+    //helper functions + variables
     bigint negate(const bigint &);  
     bigint add(const bigint&, const bigint&);  
     bigint subtract(const bigint&, const bigint&);
     void remove_leading_zeros();
-
 };
 
 
@@ -77,7 +78,7 @@ bigint::bigint(int64_t val)
     } else {
         while (val > 0)
         {
-            digits.push_back(val % 10);
+            digits.push_back(((uint8_t)val) % 10);
             val /= 10;
         }
     } 
@@ -100,7 +101,7 @@ bigint::bigint(const string& str)
         {
             throw invalid_argument("Invalid character in input string.");
         }
-        digits.push_back(ch - '0'); 
+        digits.push_back((uint8_t)ch - '0'); 
     }
 
     remove_leading_zeros();
@@ -119,20 +120,21 @@ bigint bigint::add(const bigint& num1, const bigint& num2)
 {
     bigint result;
     uint8_t carry = 0;
+    constexpr int8_t base = 10;
 
     size_t size1 = num1.digits.size();
     size_t size2 = num2.digits.size();
-    size_t size = max(size1, size2);  //take the larger size for for loop 
+    uint64_t max_size = max(size1, size2);  //take the larger size for for loop 
 
-    for(size_t i = 0; i < size; i++) {
+    for(uint64_t i = 0; i < max_size; i++) {
             //if i exceeds the size of digits, set it to 0
             uint8_t digit1 = (i < size1) ? num1.digits[i] : 0;       
             uint8_t digit2 = (i < size2) ? num2.digits[i] : 0;
 
-            uint8_t sum = digit1 + digit2 + carry; 
-            result.digits.push_back(sum % 10);
+            uint8_t sum = (uint8_t)(digit1 + digit2 + carry); 
+            result.digits.push_back((uint8_t)sum % base);
             //prepare carry for next addition
-            carry = sum / 10;
+            carry = sum / base;
     }
     //push remaining carry to result
     if(carry > 0) {
@@ -146,25 +148,26 @@ bigint bigint::subtract(const bigint& num1, const bigint& num2)
 {
     bigint result;
     uint8_t borrow = 0;
+    constexpr int8_t base = 10;
 
     size_t size1 = num1.digits.size();
     size_t size2 = num2.digits.size();
-    size_t max_size = max(size1, size2); 
+    uint64_t max_size = max(size1, size2); 
 
-    for (size_t i = 0; i < max_size; i++) {
+    for (uint64_t i = 0; i < max_size; i++) {
         uint8_t digit1 = (i < size1) ? num1.digits[i] : 0;       
         uint8_t digit2 = (i < size2) ? num2.digits[i] : 0;
 
-        uint8_t diff = digit1 - digit2 - borrow;
+        int8_t diff = (int8_t)(digit1 - digit2 - borrow);
 
         if (diff < 0) {
-            diff += 10;
+            diff += base;
             borrow = 1;
         } else {
             borrow = 0;
         }
 
-        result.digits.push_back(diff);
+        result.digits.push_back((uint8_t)diff);
     }
 
     // Remove leading zeros
@@ -191,7 +194,8 @@ bigint bigint::operator+(const bigint& other)
         if (is_negative) 
         {
             bigint positive_this = negate(*this); 
-            return other - positive_this;
+            bigint bigintOther = other;
+            return bigintOther - positive_this;
         } 
         else 
         {
@@ -244,14 +248,12 @@ bigint bigint::operator-=(const bigint& other)
     return *this;
 }
 
-
-
 bigint bigint::operator*(const bigint& other)
 {
-    bigint result = bigint(0);
+    bigint result = bigint();
 
     // If one of the numbers is zero, return zero
-    if (digits.size() == 1 && digits[0] == 0 || other.digits.size() == 1 && other.digits[0] == 0)
+    if ((digits.size() == 1 && digits[0] == 0 )|| (other.digits.size() == 1 && other.digits[0] == 0))
     {
         return result;
     }
@@ -260,19 +262,20 @@ bigint bigint::operator*(const bigint& other)
     {
         bigint temp;
         uint8_t carry = 0;
+        constexpr int8_t base = 10;
 
         // shift temp to the left
-        for (size_t j = 0; j < i; j++) 
+        for (uint64_t j = 0; j < i; j++) 
         {
             temp.digits.push_back(0); 
         }
 
             
-        for (size_t j = 0; j < other.digits.size(); j++) 
+        for (uint64_t j = 0; j < other.digits.size(); j++) 
         {
-            uint16_t product = digits[i] * other.digits[j] + carry; 
-            temp.digits.push_back(product % 10); 
-            carry = product / 10; 
+            uint16_t product = (uint16_t)(digits[i] * other.digits[j] + carry); 
+            temp.digits.push_back((uint8_t)(product % base)); 
+            carry =  (uint8_t)(product / base); 
         }
 
         // for any leftover carry, add it to temp
@@ -305,7 +308,7 @@ bigint bigint::operator-()
     return result;
 }
 
-bool bigint::operator==(const bigint& other)
+bool bigint::operator==(const bigint& other) const
 {   
 
     if (is_negative != other.is_negative || digits.size() != other.digits.size()){
@@ -321,12 +324,12 @@ bool bigint::operator==(const bigint& other)
     return true;
 }
 
-bool bigint::operator!=(const bigint& other)
+bool bigint::operator!=(const bigint& other) const
 {
     return !(*this == other);
 }   
 
-bool bigint::operator<(const bigint& other)
+bool bigint::operator<(const bigint& other) const
 {
     //compare sign 
     if (is_negative && !other.is_negative) {
@@ -356,15 +359,15 @@ bool bigint::operator<(const bigint& other)
 
     return false;
 }
-bool bigint::operator<=(const bigint& other)
+bool bigint::operator<=(const bigint& other) const
 {
     return *this < other || *this == other;
 }
-bool bigint::operator>(const bigint& other)
+bool bigint::operator>(const bigint& other) const
 {
     return !(*this <= other);
 }
-bool bigint::operator>=(const bigint& other)
+bool bigint::operator>=(const bigint& other) const
 {
     return !(*this < other);
 }
@@ -380,12 +383,14 @@ ostream& operator<<(ostream& os, const bigint& num)
         os << '0';
         return os;
     } else {
-        for (int64_t i = (int16_t)num.digits.size() - 1; i >= 0; i--)
+        for (int64_t i = (int64_t)num.digits.size() - 1; i >= 0; i--)
 
         {
             os << to_string(num.digits[i]);
         }
     }
+
+    return os;
     
     
 }
