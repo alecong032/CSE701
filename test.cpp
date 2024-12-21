@@ -54,47 +54,67 @@ void constructor_test(int64_t num, std::string str)
 //arithmetic test - addition, subtraction, multiplication
 void arithmetic_test() 
 {
-    // int64_t num1 = random_number_generator();
-    // int64_t num2 = random_number_generator();
-    // int64_t num3 = random_number_generator();
+    int64_t num1 = random_number_generator();
+    int64_t num2 = random_number_generator();
+    int64_t num3 = random_number_generator();
 
-    int64_t num1 = -1111111111111111111;
-    int64_t num2 = -1111111111111111111;
-    int64_t num3 = -2222222222222222222;
+
     bigint a(num1);
     bigint b(num2);
-
-
-
     bigint c(num3);
-    std::cout << "1:"<< num1 <<"|2:"<< num2<<"|3: " << num3<< std::endl;
-    std::cout << "a:"<< a<<"|b:"<< b<<"|c: " << c << std::endl;
-    std::cout << "a*b:"<< a*b<<std::endl;
-    std::cout << "1*2:"<< num1*num2<<std::endl;
+
     //addition
+    assert(a + b ==bigint(num1)+ bigint(num2));
+    assert(a + c == bigint(num1) + bigint(num3));
+    assert(a+b+c == bigint(num1)+bigint(num2)+bigint(num3));
 
-
-
-
-    assert(a + b == bigint(num1 + num2));
-    
-    assert(a + c == bigint(num1 + num3));
-    assert((a + b) + c == bigint((num1 + num2) + num3));
     //subtraction
-    assert(a - b == bigint(num1 - num2));
-    assert(a - c == bigint(num1 - num3));
-    assert((a - b) - c == bigint((num1 - num2) - num3));
+    assert(a - b == bigint(num1) - bigint(num2));
+    assert(a - c == bigint(num1) - bigint(num3));
+    assert(a - b - c == bigint(num1) - bigint(num2) - bigint(num3));
+
     //multiplication
-    assert(a * b == bigint(num1 * num2));
-    assert(a * c == bigint(num1 * num3));
-    assert(a * b * c == bigint(num1 * num2 * num3));
-    //consistency 
-    assert(a + b - c == a - c + b && a - c + b ==bigint(num1 + num2 - num3));
-
-
-
+    assert(a * b == bigint(num1) * bigint(num2));
+    assert(a * c == bigint(num1) * bigint(num3));
+    assert(a * b * c == bigint(num1) * bigint(num2) * bigint(num3));
     
     std::cout << "All aritmetic tests passed" << std::endl;
+}
+
+//
+void increment_test(){
+    int64_t num = random_number_generator();
+
+
+    bigint a(num);
+
+    assert(++a == bigint(num+1));
+    assert(--a== bigint(num-1));
+
+    std::cout << "All increment tests passed!" << std::endl;
+
+
+}
+void comparison_test()
+{
+    int64_t num1 = -7605473406922487838;
+    int64_t num2 = 7605473406922487838;
+    int64_t num3 = -7605473406922487838;
+    int64_t num4 = 7605473406922487837;
+
+    assert(bigint(num1) == bigint(num3));
+    assert(bigint(num1) != bigint(num2));
+    assert(bigint(num1) < bigint(num2));
+    assert(bigint(num2) > bigint(num1));
+    assert(bigint(num2) > bigint(num1));
+    assert(bigint(num1) <= bigint(num1));
+    assert(bigint(num1) >= bigint(num1));
+    assert(bigint(num1) <= bigint(num2));
+    assert(bigint(num2) >= bigint(num1));
+    assert(bigint(num4) < bigint(num2));
+
+    std::cout << "All comparison tests passed!" << std::endl;
+
 }
 
 
@@ -103,7 +123,10 @@ int main() {
         int64_t rand_num = random_number_generator();
         std::string rand_str = random_string_generator();
         constructor_test(rand_num, rand_str);
+        comparison_test();
+        
         arithmetic_test();
+        increment_test();
     } catch (const std::exception& e) {
         std::cerr << "Test failed: " << e.what() << std::endl;
         return 1;
