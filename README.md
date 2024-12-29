@@ -194,6 +194,10 @@ Comparison
 - Number 1 > Number 2 = 0
 - Number 1 >= Number 2 = 0
 
+Increment & Decrement
+- Number1 ++ =  1234567890123456789012345678901234567891
+- Number1 -- =  1234567890123456789012345678901234567889
+
 ## Example 2: Large Negative and Positive Numbers
 
 ### Input
@@ -226,6 +230,10 @@ Comparison
 - Number 1 > Number 2 = 0
 - Number 1 >= Number 2 = 0
 
+Increment & Decrement
+- Number1 ++ =  -9876543210987654321098765432109876543209
+- Number1 -- =  -9876543210987654321098765432109876543211
+
 ## Example 3: Equal Numbers
 
 ### Input
@@ -257,3 +265,7 @@ Comparison
 - Number 1 <= Number 2 = 1
 - Number 1 > Number 2 = 0
 - Number 1 >= Number 2 = 1
+
+Increment & Decrement
+- Number1 ++ =  1000
+- Number1 -- =  998
