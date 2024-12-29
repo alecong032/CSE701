@@ -172,27 +172,27 @@ Number 2 = 9876543210987654321098765432109876543210
 ### Output
 
 Addition + +=
-Number 1 + Number 2 = 11111111101111111110111111111011111111100
-Number 1 += Number 2 = 11111111101111111110111111111011111111100
+ - Number 1 + Number 2 = 11111111101111111110111111111011111111100   
+ - Number 1 += Number 2 = 11111111101111111110111111111011111111100
 
 Subtraction - -=
-Number 1 - Number 2 = -8641975320864197532086419753208641975320
-Number 1 -= Number 2 = -8641975320864197532086419753208641975320
+- Number 1 - Number 2 = -8641975320864197532086419753208641975320
+- Number 1 -= Number 2 = -8641975320864197532086419753208641975320
 
 Multiplication * *=
-Number 1 * Number 2 = 12193263113702179522618503273386678859448712086533622923332237463801111263526900
-Number 1 *= Number 2 = 12193263113702179522618503273386678859448712086533622923332237463801111263526900
+- Number 1 * Number 2 = 12193263113702179522618503273386678859448712086533622923332237463801111263526900
+- Number 1 *= Number 2 = 12193263113702179522618503273386678859448712086533622923332237463801111263526900
 
 Negation -
-Number 1 = -Number 1 = -1234567890123456789012345678901234567890
+- Number 1 = -Number 1 = -1234567890123456789012345678901234567890
 
 Comparison
-Number 1 == Number 2 = 0
-Number 1 != Number 2 = 1
-Number 1 < Number 2 = 1
-Number 1 <= Number 2 = 1
-Number 1 > Number 2 = 0
-Number 1 >= Number 2 = 0
+- Number 1 == Number 2 = 0
+- Number 1 != Number 2 = 1
+- Number 1 < Number 2 = 1
+- Number 1 <= Number 2 = 1
+- Number 1 > Number 2 = 0
+- Number 1 >= Number 2 = 0
 
 ## Example 2: Large Negative and Positive Numbers
 
@@ -204,27 +204,27 @@ Number 2 = 1234567890123456789012345678901234567890
 ### Output
 
 Addition + +=
-Number 1 + Number 2 = -8641975320864197532086419753208641975320
-Number 1 += Number 2 = -8641975320864197532086419753208641975320
+- Number 1 + Number 2 = -8641975320864197532086419753208641975320
+- Number 1 += Number 2 = -8641975320864197532086419753208641975320
 
 Subtraction - -=
-Number 1 - Number 2 = -11111111101111111110111111111011111111100
-Number 1 -= Number 2 = -11111111101111111110111111111011111111100
+- Number 1 - Number 2 = -11111111101111111110111111111011111111100
+- Number 1 -= Number 2 = -11111111101111111110111111111011111111100
 
 Multiplication * *=
-Number 1 * Number 2 = -12193263113702179522618503273386678859448712086533622923332237463801111263526900
-Number 1 *= Number 2 = -12193263113702179522618503273386678859448712086533622923332237463801111263526900
+- Number 1 * Number 2 = -12193263113702179522618503273386678859448712086533622923332237463801111263526900
+- Number 1 *= Number 2 = -12193263113702179522618503273386678859448712086533622923332237463801111263526900
 
 Negation -
-Number 1 = -Number 1 = 9876543210987654321098765432109876543210
+- Number 1 = -Number 1 = 9876543210987654321098765432109876543210
 
 Comparison
-Number 1 == Number 2 = 0
-Number 1 != Number 2 = 1
-Number 1 < Number 2 = 1
-Number 1 <= Number 2 = 1
-Number 1 > Number 2 = 0
-Number 1 >= Number 2 = 0
+- Number 1 == Number 2 = 0
+- Number 1 != Number 2 = 1
+- Number 1 < Number 2 = 1
+- Number 1 <= Number 2 = 1
+- Number 1 > Number 2 = 0
+- Number 1 >= Number 2 = 0
 
 ## Example 3: Equal Numbers
 
@@ -236,24 +236,24 @@ Number 2 = 999
 ### Output
 
 Addition + +=
-Number 1 + Number 2 = 1998
-Number 1 += Number 2 = 1998
+- Number 1 + Number 2 = 1998
+- Number 1 += Number 2 = 1998
 
 Subtraction - -=
-Number 1 - Number 2 = 0
-Number 1 -= Number 2 = 0
+- Number 1 - Number 2 = 0
+- Number 1 -= Number 2 = 0
 
 Multiplication * *=
-Number 1 * Number 2 =  998001
-Number 1 *= Number 2 = 998001
+- Number 1 * Number 2 =  998001
+- Number 1 *= Number 2 = 998001
 
 Negation -
-Number 1 = -Number 1 = -999
+- Number 1 = -Number 1 = -999
 
 Comparison
-Number 1 == Number 2 = 1
-Number 1 != Number 2 = 0
-Number 1 < Number 2 = 0
-Number 1 <= Number 2 = 1
-Number 1 > Number 2 = 0
-Number 1 >= Number 2 = 1
+- Number 1 == Number 2 = 1
+- Number 1 != Number 2 = 0
+- Number 1 < Number 2 = 0
+- Number 1 <= Number 2 = 1
+- Number 1 > Number 2 = 0
+- Number 1 >= Number 2 = 1
