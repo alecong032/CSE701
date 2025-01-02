@@ -492,7 +492,7 @@ void large_number_test()
 
     // Test Subtraction
     bigint subtraction_result = a - b;       // 1000...000 - 999...999
-    bigint expected_subtraction_result("1"); // The result should be -1
+    bigint expected_subtraction_result("1"); // The result should be 1
     if (subtraction_result == expected_subtraction_result)
     {
         pass++;
