@@ -18,7 +18,6 @@ The `bigint` class includes three constructors:
    ```cpp
    bigint();
    ```
-
    Creates a `bigint` initialized to `0`.
 
 2. **Integer Constructor**:
@@ -26,10 +25,10 @@ The `bigint` class includes three constructors:
    ```cpp
    bigint(int64_t value);
    ```
-
    Converts a `signed 64-bit integer` to a `bigint`.
 
 3. **String Constructor**:
+
    ```cpp
    bigint(const std::string& value);
    ```
@@ -74,17 +73,22 @@ Addition involves summing two `bigint` numbers digit by digit. The helper functi
 2. **Different Signs**:
 
    - If the numbers have different signs, the addition is converted to subtraction, the sign will be negated before passing into subtraction helper function:
-     - Example: `5 + (-3)` is equivalent to `5 - 3`.
 
+        - num1+(−num2)=num1−num2
+        - (−num1)+num2=num2−num1
+     
 3. **Carry Handling**:
    - When the sum of two digits exceeds the base (10), the carry is added to the next digit.
 
 ### Helper Function: `add`
 
-The `add` function performs addition for positive numbers:
+The `add` function performs addition for only positive numbers, the logic for sign handling is in operator+
 
-- Iterates over the digits of both numbers.
-- Adds corresponding digits and the carry.
+- removes leading zero introduced by constructor
+- Iterates over the digits of both numbers and compute the following
+    - sum = digit1 + digit2 + carry
+    - result.digit = sum % base
+    - carry=sum/base
 - Stores the result in the `digits` vector of the resulting `bigint`.
 
 ---
@@ -97,8 +101,9 @@ Subtraction is performed by comparing the magnitudes of the numbers and subtract
 
 1. **Sign Handling**:
 
-   - If the signs of the two numbers differ, convert the subtraction into addition. Negated number will be passed into `add` helper function.
-     - Example: `5 - (-3)` becomes `5 + 3`.
+   - If the signs of the second numbers is negative, convert the subtraction into addition. Negated second number will be passed into `add` helper function. 
+     - num1−(−num2)=num1+num2
+     - −num1−(-num2)=−(num1+num2)
 
 2. **Magnitude Comparison**:
 
@@ -107,16 +112,22 @@ Subtraction is performed by comparing the magnitudes of the numbers and subtract
      - Assign the appropriate sign to the result.
 
 3. **Borrow Handling**:
-   - If a digit in the minuend is smaller than the corresponding digit in the subtrahend, borrow 10 from the next digit.
+
+   - If a digit in the minuend is smaller than the corresponding digit in the subtrahend, borrow 10 from the next digit. This is handled in `subtract` helper function.
 
 ### Helper Function: `subtract`
 
 The `subtract` function handles subtraction for positive numbers:
 
-- Iterates over the digits of both numbers.
-- Subtracts corresponding digits, handling borrows as necessary.
+- If num2 is negative, the operation becomes an addition: num1 - (-num2) = num1 + num2
+- Iterates over the digits of both numbers from least significant to most significant and compute the following:
+    - diff=num1.digit−num2.digit+borrow
+    - If diff is negative, borrow from the next digit:
+        - diff=diff+10
+        - borrow=−1
+    - Append the computed diff to result.digits.
 - Removes leading zeros from the result.
-
+- If the result is exactly 0, set `is_negative = false` to ensure correct sign representation.
 ---
 
 ## Multiplication Logic
@@ -146,14 +157,6 @@ Multiplication uses the **long multiplication** method, which is similar to manu
 5. **Sign Assignment**:
    - The result is negative if the signs of the two numbers differ.
 
-### Helper Function: `operator*`
-
-The `operator*` method implements the multiplication logic:
-
-- Multiplies two `bigint` numbers using the long multiplication algorithm.
-- Manages digit-by-digit products and carries.
-- Uses temporary `bigint` instances to accumulate intermediate results.
-
 ---
 
 # Example Outputs for `bigint` Operations
@@ -172,38 +175,34 @@ Number 2 = 9876543210987654321098765432109876543210
 ### Output
 
 Addition + +=
- - Number 1 + Number 2 = 11111111101111111110111111111011111111100   
- - Number 1 += Number 2 = 11111111101111111110111111111011111111100
+Number 1 + Number 2 = 11111111101111111110111111111011111111100
+Number 1 += Number 2 = 11111111101111111110111111111011111111100
 
 Subtraction - -=
-- Number 1 - Number 2 = -8641975320864197532086419753208641975320
-- Number 1 -= Number 2 = -8641975320864197532086419753208641975320
+Number 1 - Number 2 = -8641975320864197532086419753208641975320
+Number 1 -= Number 2 = -8641975320864197532086419753208641975320
 
 Multiplication * *=
-- Number 1 * Number 2 = 12193263113702179522618503273386678859448712086533622923332237463801111263526900
-- Number 1 *= Number 2 = 12193263113702179522618503273386678859448712086533622923332237463801111263526900
+Number 1 _ Number 2 = 12193263113702179522618503273386678859448712086533622923332237463801111263526900
+Number 1 *= Number 2 = 12193263113702179522618503273386678859448712086533622923332237463801111263526900
 
 Negation -
-- Number 1 = -Number 1 = -1234567890123456789012345678901234567890
+Number 1 = -Number 1 = -1234567890123456789012345678901234567890
 
 Comparison
-- Number 1 == Number 2 = 0
-- Number 1 != Number 2 = 1
-- Number 1 < Number 2 = 1
-- Number 1 <= Number 2 = 1
-- Number 1 > Number 2 = 0
-- Number 1 >= Number 2 = 0
-
-Increment & Decrement
-- Number1 ++ =  1234567890123456789012345678901234567891
-- Number1 -- =  1234567890123456789012345678901234567889
+Number 1 == Number 2 = 0
+Number 1 != Number 2 = 1
+Number 1 < Number 2 = 1
+Number 1 <= Number 2 = 1
+Number 1 > Number 2 = 0
+Number 1 >= Number 2 = 0
 
 ## Example 2: Large Negative and Positive Numbers
 
 ### Input
 
-Number 1 = -9876543210987654321098765432109876543210
-Number 2 = 1234567890123456789012345678901234567890
+- Number 1 = -9876543210987654321098765432109876543210
+- Number 2 = 1234567890123456789012345678901234567890
 
 ### Output
 
@@ -230,16 +229,12 @@ Comparison
 - Number 1 > Number 2 = 0
 - Number 1 >= Number 2 = 0
 
-Increment & Decrement
-- Number1 ++ =  -9876543210987654321098765432109876543209
-- Number1 -- =  -9876543210987654321098765432109876543211
-
 ## Example 3: Equal Numbers
 
 ### Input
 
-Number 1 = 999
-Number 2 = 999
+- Number 1 = 999
+- Number 2 = 999
 
 ### Output
 
@@ -252,7 +247,7 @@ Subtraction - -=
 - Number 1 -= Number 2 = 0
 
 Multiplication * *=
-- Number 1 * Number 2 =  998001
+- Number 1 * Number 2 = 998001
 - Number 1 *= Number 2 = 998001
 
 Negation -
@@ -266,6 +261,24 @@ Comparison
 - Number 1 > Number 2 = 0
 - Number 1 >= Number 2 = 1
 
-Increment & Decrement
-- Number1 ++ =  1000
-- Number1 -- =  998
+
+## Example 4: Increment and Decrement
+
+### Input
+
+- Number 1 = -10 
+
+## Output
+
+Post-increment
+- Number 1++ = -10, Number 1 = -9 (increment on second call)
+
+Post-decrement 
+- Number 1-- = -10, Number 1 = -11 (decrement on second call)
+
+Pre-increment 
+- ++Number 1 = -9
+
+pre-decrement 
+- --Number1 = -11
+

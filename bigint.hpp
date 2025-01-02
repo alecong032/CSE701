@@ -15,50 +15,53 @@ class bigint
 {
 public:
     // Constructors
-    bigint();
+    bigint();                    // default constructor
     bigint(int64_t);             // constructor for processing int64_t
     bigint(const std::string &); // constructor for processing string
 
     // Operators
     // subtraction
-    bigint operator-(const bigint &);
-    bigint operator-=(const bigint &);
+    bigint operator-(const bigint &);  // subtraction
+    bigint operator-=(const bigint &); // subtraction assignment
     // addition
-    bigint operator+(const bigint &);
-    bigint operator+=(const bigint &);
+    bigint operator+(const bigint &);  // addition
+    bigint operator+=(const bigint &); // addition assignment
 
     // multiplication
-    bigint operator*(const bigint &);
-    bigint operator*=(const bigint &);
+    bigint operator*(const bigint &);  // multiplication
+    bigint operator*=(const bigint &); // multiplication assignment
 
     // negation
-    bigint operator-();
+    bigint operator-(); // unary negation
 
     // comparison
-    bool operator==(const bigint &) const;
-    bool operator!=(const bigint &) const;
-    bool operator<(const bigint &) const;
-    bool operator<=(const bigint &) const;
-    bool operator>(const bigint &) const;
-    bool operator>=(const bigint &) const;
+    bool operator==(const bigint &) const; // equal to
+    bool operator!=(const bigint &) const; // not equal to
+    bool operator<(const bigint &) const;  // less than
+    bool operator<=(const bigint &) const; // less than or equal to
+    bool operator>(const bigint &) const;  // greater than
+    bool operator>=(const bigint &) const; // greater than or equal to
 
     // insertion
-    friend std::ostream &operator<<(std::ostream &, const bigint &);
+    friend std::ostream &operator<<(std::ostream &, const bigint &); // output stream
 
     // increment and decrement
     // pre + post
-    bigint operator++();
-    bigint operator--();
+    bigint operator++(); // pre-increment
+    bigint operator--(); // pre-decrement
+
+    bigint operator++(int); // post-increment
+    bigint operator--(int); // post-decrement
 
 private:
-    std::vector<int8_t> digits;
-    bool is_negative;
+    std::vector<int8_t> digits; // little endian
+    bool is_negative;           // true if negative, false if positive
 
     // helper functions + variables
-    bigint negate(const bigint &) const;
-    bigint add(const bigint &, const bigint &);
-    bigint subtract(const bigint &, const bigint &);
-    bool is_smaller(const bigint &, const bigint &) const;
+    bigint negate(const bigint &) const;                   // negate a bigint
+    bigint add(const bigint &, const bigint &);            // addition logic for two positive numbers
+    bigint subtract(const bigint &, const bigint &);       // subtraction logic for num1 > num2
+    bool is_smaller(const bigint &, const bigint &) const; // compare two bigints
 };
 
 /**
@@ -125,7 +128,7 @@ bigint::bigint(const std::string &str)
 
         if (str[(size_t)i] < '0' || str[(size_t)i] > '9')
         {
-            throw std::invalid_argument("Invalid argument");
+            throw std::invalid_argument("Invalid argument: " + str);
         }
         digits.push_back(str[(size_t)i] - '0'); // convert char to int
     }
@@ -135,7 +138,7 @@ bigint::bigint(const std::string &str)
  * @brief a helper function to negate of a bigint
  *
  * @param num a bigint to be negated
- * @return bigint
+ * @return bigint the negated bigint
  */
 bigint bigint::negate(const bigint &num) const
 {
@@ -149,7 +152,7 @@ bigint bigint::negate(const bigint &num) const
  *
  * @param num1 a bigint that is always positive
  * @param num2 a bigint that is always positive
- * @return bigint
+ * @return bigint the result of the addition
  */
 bigint bigint::add(const bigint &num1, const bigint &num2)
 {
@@ -188,9 +191,9 @@ bigint bigint::add(const bigint &num1, const bigint &num2)
 /**
  * @brief a helper function contains the logic for subtraction of two bigints
  *
- * @param num1 a bigint that is always positive
- * @param num2 a bigint that is always positive
- * @return bigint
+ * @param num1 a bigint that is larger than num2
+ * @param num2 a bigint
+ * @return bigint the result of the subtraction
  */
 bigint bigint::subtract(const bigint &num1, const bigint &num2)
 {
@@ -209,6 +212,7 @@ bigint bigint::subtract(const bigint &num1, const bigint &num2)
         return add(n1, n2);
     }
 
+    // perform the subtraction for each digits
     while (i < (int64_t)n1.digits.size() || i < (int64_t)n2.digits.size())
     {
         int8_t diff = borrow; // Subtract the borrow
@@ -268,26 +272,28 @@ bool bigint::is_smaller(const bigint &num1, const bigint &num2) const
 
     if (num1.is_negative && !num2.is_negative)
     {
-        return true; // Negative is always smaller than positive
+        return true; // negative is always smaller than positive
     }
 
     if (!num1.is_negative && num2.is_negative)
     {
-        return false; // Positive is always larger than negative
+        return false; // positive is always larger than negative
     }
 
     if (num1.digits.size() < num2.digits.size())
     {
-        return true; // Fewer digits means smaller
+        return true; // fewer digits means smaller
     }
 
     if (num1.digits.size() > num2.digits.size())
     {
-        return false; // More digits means larger
+        return false; // more digits means larger
     }
 
+    // if the number of digits are the same, compare each digit from the most significant digit
     for (int64_t i = (int64_t)num1.digits.size() - 1; i >= 0; i--)
-    { // Compare each digit from the most significant digit
+    {
+        // Compare each digit from the most significant digit
         if (num1.digits[(size_t)i] < num2.digits[(size_t)i])
         {
             return true;
@@ -302,10 +308,10 @@ bool bigint::is_smaller(const bigint &num1, const bigint &num2) const
 
 // operator logic
 /**
- * @brief Overload the + operator to perform addition of two bigints use helper functions: add subtract
+ * @brief Overload the + operator to perform addition of two bigints using helper functions
  *
  * @param other a bigint to be added
- * @return bigint
+ * @return bigint the result of the addition
  */
 bigint bigint::operator+(const bigint &other)
 {
@@ -314,22 +320,24 @@ bigint bigint::operator+(const bigint &other)
     // Case 1: Same sign -> Perform addition
     if (is_negative == other.is_negative)
     {
-        result = add(*this, other);
-        result.is_negative = is_negative; // Result takes the sign of the operands
+        result = add(*this, other);       // add takes two positive numbers and returns a positive number
+        result.is_negative = is_negative; // assign the sign of the result based on the sign of either number
     }
     // Case 2: Different signs -> Perform subtraction
     else
     {
+        // num1 < num2, calculate num2 - (+num)
         if (is_smaller(*this, other))
-        { // num1 < num2, calculate num2 - (+num)
+        {
             bigint n1 = negate(*this);
             bigint n2 = other;
-            result = n2 - n1;
+            result = n2 - n1; // pass to operator- to perform subtraction and handle the sign
         }
+        // num1 > num2, calculate num1 - (+num2)
         else
-        { // num1 > num2, calculate num1 - (+num2)
+        {
             bigint n2 = negate(other);
-            result = *this - n2;
+            result = *this - n2; // pass to operator- to perform subtraction and handle the sign
         }
     }
 
@@ -340,7 +348,7 @@ bigint bigint::operator+(const bigint &other)
  * @brief Overload the += operator to perform addition of two bigints use operator+()
  *
  * @param other a bigint to be added
- * @return bigint
+ * @return bigint the result of the addition
  */
 bigint bigint::operator+=(const bigint &other)
 {
@@ -349,36 +357,43 @@ bigint bigint::operator+=(const bigint &other)
 }
 
 /**
- * @brief Overload the - operator to perform subtraction of two bigints use helper functions: add subtract
+ * @brief Overload the - operator to perform subtraction of two bigints using helper functions
  *
  * @param other a bigint to be subtracted
- * @return bigint
+ * @return bigint the result of the subtraction
  */
 bigint bigint::operator-(const bigint &other)
 {
     bigint result;
+
+    // second number is negative, convert to addition
     if (other.is_negative)
-    { // equivalent to addition
+    {
         bigint n2 = negate(other);
-        result = add(*this, n2);
+        result = *this + n2; // pass to operator+ to perform addition and handle the sign
     }
     else
     {
+        // equivalent to addition
         if (is_negative)
-        { // equivalent to addition
+        {
+            // −num1−(-num2)=−(num1+num2)
             bigint n1 = negate(*this);
             result = add(n1, other);
             result.is_negative = true; // num1 < num2, result is negative
         }
+        // when both numbers have same sign
         else
         {
+            // num1 < num2, calculate num2 - num1
             if (is_smaller(*this, other))
-            { // num1 < num2, calculate num2 - num1
+            {
                 result = subtract(other, *this);
                 result.is_negative = true; // num1 < num2, result is negative
             }
+            // num1 > num2, calculate num1 - num2
             else
-            { // num1 > num2, calculate num1 - num2
+            {
                 result = subtract(*this, other);
             }
         }
@@ -389,7 +404,7 @@ bigint bigint::operator-(const bigint &other)
 /**
  * @brief Overload the -= operator to perform subtraction of two bigints use  operator-()
  * @param other a bigint to be subtracted
- * @return bigint
+ * @return bigint the result of the subtraction
  */
 bigint bigint::operator-=(const bigint &other)
 {
@@ -401,7 +416,7 @@ bigint bigint::operator-=(const bigint &other)
  * @brief Overload the * operator to perform multiplication of two bigints using long multiplication method
  *
  * @param other
- * @return bigint
+ * @return bigint the result of the multiplication
  */
 bigint bigint::operator*(const bigint &other)
 {
@@ -451,7 +466,7 @@ bigint bigint::operator*(const bigint &other)
  * @brief Overload the *= operator to perform multiplication of two bigints use operator*()
  *
  * @param other a bigint to be multiplied
- * @return bigint
+ * @return bigint the result of the multiplication
  */
 bigint bigint::operator*=(const bigint &other)
 {
@@ -462,7 +477,7 @@ bigint bigint::operator*=(const bigint &other)
 /**
  * @brief Overload the - operator to negate a bigint
  *
- * @return bigint
+ * @return bigint the negated bigint
  */
 bigint bigint::operator-()
 {
@@ -485,10 +500,13 @@ bool bigint::operator==(const bigint &other) const
     {
         return false;
     }
+
+    // compare each digit
     for (size_t i = 0; i < digits.size(); i++)
     {
         int8_t digit1 = digits[i];
         int8_t digit2 = other.digits[i];
+
         if (digit1 != digit2)
         {
             return false;
@@ -570,7 +588,7 @@ bool bigint::operator>=(const bigint &other) const
  *
  * @param os an output stream
  * @param num a bigint to be inserted
- * @return std::ostream&
+ * @return std::ostream& the output stream
  */
 std::ostream &operator<<(std::ostream &os, const bigint &num)
 {
@@ -596,23 +614,49 @@ std::ostream &operator<<(std::ostream &os, const bigint &num)
 }
 
 /**
- * @brief Overload the ++ operator to preincrement and postincrement a bigint
+ * @brief Overload the ++ operator to increment a bigint
  *
- * @return bigint&
+ * @return bigint the pre-incremented bigint
  */
 bigint bigint::operator++()
 {
-    *this += 1;
+    *this = *this + 1; // Add 1 to the current object
     return *this;
 }
 
 /**
- * @brief Overload the -- operator to predecrement and postdecrement a bigint
+ * @brief Overload the ++ operator to increment a bigint
  *
- * @return bigint&
+ * @param int
+ * @return bigint the post-incremented bigint
+ */
+bigint bigint::operator++(int)
+{
+    bigint temp = *this;
+    ++(*this); // Use pre-increment to modify the object
+    return temp;
+}
+
+/**
+ * @brief Overload the -- operator to decrement a bigint
+ *
+ * @return bigint the pre-decremented bigint
  */
 bigint bigint::operator--()
 {
-    *this -= 1;
+    *this = *this - 1; // Subtract 1 from the current object
     return *this;
+}
+
+/**
+ * @brief Overload the -- operator to decrement a bigint
+ *
+ * @param int
+ * @return bigint the post-decremented bigint
+ */
+bigint bigint::operator--(int)
+{
+    bigint temp = *this; // Save the current state
+    --(*this);           // Use pre-decrement to modify the object
+    return temp;
 }
